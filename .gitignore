@@ -1,0 +1,14 @@
+# 個人設定・認証情報（GitHubに公開しない）
+config.json
+.env
+.env.local
+
+# レポート出力（生成物は除外・フォルダ構造だけ残す）
+report/*
+!report/.gitkeep
+
+# OS・エディタ
+.DS_Store
+Thumbs.db
+.vscode/
+*.log
