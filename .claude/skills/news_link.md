@@ -20,9 +20,28 @@ description: 指定ニュースURLからビジネス・社会情勢記事を取�
 ## 使い方
 
 ```text
-/news-link <URL>
-/news-link <URL1> <URL2> ...   # 複数URL対応
+/news-link          # 全サイトから取得
+/news-link <URL>    # 特定URLのみ（デフォルトリストを上書き）
 ```
+
+---
+
+## 対象ニュースサイト（固定）
+
+以下のサイトを毎回巡回する：
+
+| # | サイト | URL |
+| --- | --- | --- |
+| 1 | NewsPicks | <https://newspicks.com/> |
+| 2 | Hacker News | <https://news.ycombinator.com/> |
+| 3 | Yahoo!ニュース | <https://news.yahoo.co.jp/> |
+| 4 | ITmedia NEWS | <https://www.itmedia.co.jp/news/> |
+| 5 | Newsweek日本版 | <https://www.newsweekjapan.jp/> |
+| 6 | Design News | <https://www.designnews.com/> |
+| 7 | DevelopersIO | <https://dev.classmethod.jp/> |
+| 8 | Google ニュース（日本） | <https://news.google.com/home?hl=ja&gl=JP&ceid=JP:ja> |
+
+引数でURLを指定した場合はそのURLのみを処理し、上記リストは使用しない。
 
 ---
 
@@ -30,74 +49,100 @@ description: 指定ニュースURLからビジネス・社会情勢記事を取�
 
 ### Step 1: 記事を取得する
 
-`WebFetch` ツールで各URLの記事本文を取得する。
+`WebFetch` ツールで各サイトのトップページを取得し、記事リンクを収集する。
+各サイトから最大**5件**の記事リンクを抽出し、それぞれの記事本文を取得する。
 
 取得できない場合（ペイウォール・タイムアウトなど）は、その旨をレポートに記録してスキップ。
 
-### Step 2: ビジネス・社会情勢フィルタリング
+### Step 2: カテゴリ判定
 
-以下のカテゴリに該当する内容を「対象記事」と判定する：
+すべての記事を処理対象とする。スキップしない。
+記事の内容から以下のカテゴリを1つ選択する：
 
-- 経済・金融・市場・為替・株価
-- 企業動向・M&A・決算・スタートアップ
-- 政策・規制・法改正・行政
-- AI・テクノロジー・DX・サイバーセキュリティ
-- 社会問題・人口・労働・医療・環境
-- 国際情勢・貿易・地政学リスク
-
-上記に**まったく関係しない**（スポーツ・芸能・グルメなど）は除外し、除外理由を記録する。
+| カテゴリ | 例 |
+| --- | --- |
+| 経済 | 株価・為替・金融・節税 |
+| テクノロジー | AI・ガジェット・ソフトウェア |
+| 政策 | 法改正・規制・行政 |
+| 国際 | 地政学・貿易・外交 |
+| 社会 | 環境・労働・医療・人口 |
+| 企業 | 決算・M&A・スタートアップ |
+| 芸能・文化 | 人物・作品・音楽・映画・スポーツ |
+| ライフスタイル | グルメ・旅行・健康・ファッション |
 
 ### Step 3: 要約の生成
 
-対象記事ごとに以下の形式で要約する：
+すべての記事について以下の形式で要約する：
 
 ```text
 【タイトル】記事タイトル
-【カテゴリ】経済 / テクノロジー / 政策 / 国際 / 社会 / 企業 （1つ選択）
-【要約】200〜400字の日本語要約。
-　　　  ・何が起きたか（Fact）
-　　　  ・なぜ重要か（Why it matters）
-　　　  ・今後の注目点（What to watch）
+【カテゴリ】Step2で選択したカテゴリ
+【要約】100〜300字の日本語要約（簡潔に内容を伝える）
 【出典URL】元URL
 【取得日時】YYYY-MM-DD HH:mm
 ```
 
 ### Step 4: キーワード抽出 & アフィリエイト検索URL生成
 
-要約から**ビジネス・商品購買に結びつきやすいキーワード**を3〜5個抽出する。
+記事のカテゴリに応じて、**商品購買に結びつくキーワード**を3〜5個抽出する。
+直接的な商品名がなくても、記事の内容から**連想できる商品カテゴリ**に変換する。
 
-抽出基準：
+**カテゴリ別キーワード変換ルール：**
 
-- 具体的な商品・サービス名（例：「生成AI」「太陽光パネル」「EV」）
-- 課題解決に関連するツール・書籍カテゴリ（例：「リスキリング」→ オンライン講座・書籍）
-- 投資・節約・副業など金融行動を促すテーマ
+| 記事の内容 | 変換例 | 抽出キーワード |
+| --- | --- | --- |
+| 著名人・作家・アーティスト | 東野圭吾 → 著作物 | `東野圭吾 本`、`ミステリー小説` |
+| 映画・ドラマ・配信 | Apple TV+新ドラマ → 視聴環境 | `Apple TV`、`Fire TV Stick`、`スマートテレビ` |
+| 環境・自然問題 | クマ出没・駆除 → 防護・アウトドア | `熊よけスプレー`、`アウトドア用品`、`防獣グッズ` |
+| スポーツ選手・試合 | 野球・サッカー → 観戦・用品 | `野球グローブ`、`サッカーボール`、`スポーツウェア` |
+| 健康・医療 | 新薬・疾患ニュース | `サプリメント`、`健康器具`、`医療保険` |
+| ガジェット・家電 | iPhone値下げ | `iPhone ケース`、`iPhone 充電器`、`スマホアクセサリ` |
+| グルメ・食 | 人気レストラン・食材 | `食材名`、`調理器具`、`レシピ本` |
+| 旅行・観光 | 観光地ニュース | `旅行バッグ`、`旅行保険`、`ガイドブック` |
+| AI・テクノロジー | 新AIモデル発表 | `生成AI 本`、`プログラミング入門`、`AIツール` |
+| 経済・投資 | 株価・金融ニュース | `投資入門書`、`家計簿アプリ`、`節約術` |
+| 芸能・アイドル | 新曲・ライブ | `アーティスト名 CD`、`ライブグッズ`、`Blu-ray` |
 
-各キーワードについて以下の検索URLを生成する：
+**変換の考え方：**
+
+1. 記事に登場する人物・場所・出来事から「何かを欲しくなる人」を想像する
+2. その人が検索しそうな商品キーワードを3〜5個選ぶ
+3. 固有名詞（人名・作品名・ブランド名）はそのままキーワードにしてよい
+
+各キーワードについて以下のアフィリエイト検索URLを生成する：
 
 ```text
-Amazon   : https://www.amazon.co.jp/s?k={keyword}&tag={AMAZON_AFFILIATE_TAG}
-楽天市場 : https://search.rakuten.co.jp/search/mall/{keyword}/?R=1
-Yahoo!   : https://shopping.yahoo.co.jp/search?p={keyword}
+楽天  : https://affiliate.rakuten.co.jp/search?sitem={keyword}&l-id=af_header_cta_search
+Amazon: https://www.amazon.co.jp/s?k={keyword}&crid=3LMLYI7X0CA62&sprefix={keyword}%2Caps%2C273&ref=nb_sb_ss_saint-jp-refocus-candidate_9_1
+A8.net: https://media-console.a8.net/program/search/keyword?keywords={keyword}&pageNo=1&pageSize=20&sortKey=NORMAL
 ```
 
-> `{AMAZON_AFFILIATE_TAG}` は環境変数 `AMAZON_TAG` があればそれを使用。
-> 未設定の場合は `amazon-tag-placeholder` を挿入してレポートに注記する。
-
-キーワードはURLエンコードして埋め込む（スペース→`+`）。
+キーワードはURLエンコードして埋め込む（スペース→`+`、日本語は `%XX` 形式）。
 
 ### Step 5: Notion への保存
 
-`notion-create-pages` ツールを使用して、設定された Notion データベースにページを作成する。
+保存先は Notion ワークスペース内の **`Claude Contents` > `news_link`** とする。
 
-**Notion データベースID の取得順序：**
+#### 5-1: 保存先ページの確認・作成
 
-1. 環境変数 `NOTION_NEWS_DB_ID` を確認
-2. プロジェクトルートの `config.json` の `notion_db_id` を確認
-3. いずれもない場合 → 保存をスキップし、レポートにその旨を記録
+以下の順で保存先を確認し、存在しない場合は作成する：
 
-**Notion ページの構成：**
+1. `notion-search` で `Claude Contents` ページを検索する
+   - 見つかった場合 → そのページIDを `parent_id` として記録
+   - 見つからない場合 → `notion-create-pages` でワークスペースルートに `Claude Contents` ページを作成し、そのIDを記録
+
+2. `Claude Contents` の子ページから `news_link` を検索する
+   - 見つかった場合 → そのページIDを `news_link_parent_id` として記録
+   - 見つからない場合 → `notion-create-pages` で `Claude Contents` 配下に `news_link` ページを作成し、IDを記録
+
+3. 取得した `news_link_parent_id` を `config.json` の `notion_db_id` に自動書き込みして次回以降はスキップできるようにする
+
+#### 5-2: 記事ページの作成
+
+`notion-create-pages` で `news_link` ページ配下に記事ページを作成する。
 
 ```text
+保存先    : Claude Contents / news_link / {記事タイトル}
 タイトル  : 記事タイトル（最大100文字）
 プロパティ:
   - カテゴリ (select)  : Step3で判定したカテゴリ
@@ -139,10 +184,10 @@ Markdown ファイルを作成する。
 
 ## 関連キーワード & アフィリエイトリンク
 
-| キーワード | Amazon | 楽天 | Yahoo! |
+| キーワード | 楽天 | Amazon | A8.net |
 | --- | --- | --- | --- |
-| {kw1} | [検索]({amazon_url1}) | [検索]({rakuten_url1}) | [検索]({yahoo_url1}) |
-| {kw2} | [検索]({amazon_url2}) | [検索]({rakuten_url2}) | [検索]({yahoo_url2}) |
+| {kw1} | [検索]({rakuten_url1}) | [検索]({amazon_url1}) | [検索]({a8_url1}) |
+| {kw2} | [検索]({rakuten_url2}) | [検索]({amazon_url2}) | [検索]({a8_url2}) |
 
 ---
 
@@ -174,18 +219,24 @@ Markdown ファイルを作成する。
 
 ## 設定（config.json）
 
-プロジェクトルートに以下の形式で `config.json` を置くと動作をカスタマイズできる：
+`config.example.json` をコピーして `config.json` を作成し、各値を設定する。
+`config.json` は `.gitignore` で除外されるため GitHub に公開されない。
 
-```json
-{
-  "notion_db_id": "xxxx-xxxx-xxxx-xxxx",
-  "amazon_tag": "your-affiliate-tag-22",
-  "affiliate_platforms": ["amazon", "rakuten", "yahoo"],
-  "report_dir": "report",
-  "summary_max_chars": 400,
-  "categories": ["経済", "テクノロジー", "政策", "国際", "社会", "企業"]
-}
+```bash
+cp config.example.json config.json
 ```
+
+読み込み優先順：`config.json` → 環境変数 → デフォルト値
+
+| キー | 説明 | 必須 |
+| --- | --- | --- |
+| `notion_db_id` | Notion データベースID | Notion保存時のみ |
+| `affiliate_ids.amazon_tag` | Amazon アフィリエイトタグ | 任意 |
+| `affiliate_ids.rakuten_affiliate_id` | 楽天アフィリエイトID | 任意 |
+| `affiliate_ids.a8net_media_id` | A8.net メディアID | 任意 |
+| `report_dir` | レポート保存先フォルダ | 任意（デフォルト: `report`） |
+| `summary_max_chars` | 要約の最大文字数 | 任意（デフォルト: 400） |
+| `max_articles_per_site` | 1サイトあたりの最大取得記事数 | 任意（デフォルト: 5） |
 
 ---
 
@@ -195,6 +246,7 @@ Markdown ファイルを作成する。
 | --- | --- |
 | URLが取得できない | スキップ・理由をレポートに記録 |
 | ビジネス関連でない記事 | 除外・理由を記録 |
-| Notion 未設定 | Notion保存スキップ・report保存は実行 |
+| `Claude Contents` が存在しない | 自動作成してから保存 |
+| `news_link` ページが存在しない | 自動作成してから保存 |
+| Notion MCP が未接続 | Notion保存スキップ・report保存は実行 |
 | report/ フォルダ不在 | 自動作成して保存 |
-| Amazon TAG 未設定 | プレースホルダーで出力・注記を追加 |
