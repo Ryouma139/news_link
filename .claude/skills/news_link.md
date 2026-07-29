@@ -112,9 +112,10 @@ description: 指定ニュースURLからビジネス・社会情勢記事を取�
 各キーワードについて以下のアフィリエイト検索URLを生成する：
 
 ```text
-楽天  : https://affiliate.rakuten.co.jp/search?sitem={keyword}&l-id=af_header_cta_search
-Amazon: https://www.amazon.co.jp/s?k={keyword}&crid=3LMLYI7X0CA62&sprefix={keyword}%2Caps%2C273&ref=nb_sb_ss_saint-jp-refocus-candidate_9_1
-A8.net: https://media-console.a8.net/program/search/keyword?keywords={keyword}&pageNo=1&pageSize=20&sortKey=NORMAL
+楽天    : https://affiliate.rakuten.co.jp/search?sitem={keyword}&l-id=af_header_cta_search
+Amazon  : https://www.amazon.co.jp/s?k={keyword}&crid=3LMLYI7X0CA62&sprefix={keyword}%2Caps%2C273&ref=nb_sb_ss_saint-jp-refocus-candidate_9_1
+A8.net  : https://media-console.a8.net/program/search/keyword?keywords={keyword}&pageNo=1&pageSize=20&sortKey=NORMAL
+もしも  : https://af.moshimo.com/af/shop/promotion/search?form_name=promotion_search_form&shop_site_id=&words={keyword}&apply_status=&limit=10
 ```
 
 キーワードはURLエンコードして埋め込む（スペース→`+`、日本語は `%XX` 形式）。
@@ -184,10 +185,10 @@ Markdown ファイルを作成する。
 
 ## 関連キーワード & アフィリエイトリンク
 
-| キーワード | 楽天 | Amazon | A8.net |
-| --- | --- | --- | --- |
-| {kw1} | [検索]({rakuten_url1}) | [検索]({amazon_url1}) | [検索]({a8_url1}) |
-| {kw2} | [検索]({rakuten_url2}) | [検索]({amazon_url2}) | [検索]({a8_url2}) |
+| キーワード | 楽天 | Amazon | A8.net | もしも |
+| --- | --- | --- | --- | --- |
+| {kw1} | [検索]({rakuten_url1}) | [検索]({amazon_url1}) | [検索]({a8_url1}) | [検索]({moshimo_url1}) |
+| {kw2} | [検索]({rakuten_url2}) | [検索]({amazon_url2}) | [検索]({a8_url2}) | [検索]({moshimo_url2}) |
 
 ---
 
@@ -234,6 +235,7 @@ cp config.example.json config.json
 | `affiliate_ids.amazon_tag` | Amazon アフィリエイトタグ | 任意 |
 | `affiliate_ids.rakuten_affiliate_id` | 楽天アフィリエイトID | 任意 |
 | `affiliate_ids.a8net_media_id` | A8.net メディアID | 任意 |
+| `affiliate_ids.moshimo_shop_site_id` | もしもアフィリエイト ショップサイトID | 任意 |
 | `report_dir` | レポート保存先フォルダ | 任意（デフォルト: `report`） |
 | `summary_max_chars` | 要約の最大文字数 | 任意（デフォルト: 400） |
 | `max_articles_per_site` | 1サイトあたりの最大取得記事数 | 任意（デフォルト: 5） |
