@@ -115,7 +115,7 @@ description: 指定ニュースURLからビジネス・社会情勢記事を取�
 楽天    : https://affiliate.rakuten.co.jp/search?sitem={keyword}&l-id=af_header_cta_search
 Amazon  : https://www.amazon.co.jp/s?k={keyword}&crid=3LMLYI7X0CA62&sprefix={keyword}%2Caps%2C273&ref=nb_sb_ss_saint-jp-refocus-candidate_9_1
 A8.net  : https://media-console.a8.net/program/search/keyword?keywords={keyword}&pageNo=1&pageSize=20&sortKey=NORMAL
-もしも  : https://af.moshimo.com/af/shop/promotion/search?form_name=promotion_search_form&shop_site_id=&words={keyword}&apply_status=&limit=10
+もしも  : https://af.moshimo.com/af/shop/promotion/search?shop_site_id=&promotion_category_code=&promotion_level1_category_code=&words={keyword}&except_words=&promotion_option_status=&promotion_option_service=&promotion_option_affiliate=&promotion_option_result=&apply_status=&merchant_id=&order=&page=&limit=10&restore=&form_name=promotion_search_form
 ```
 
 キーワードはURLエンコードして埋め込む（スペース→`+`、日本語は `%XX` 形式）。
