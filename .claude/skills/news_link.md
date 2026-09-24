@@ -122,7 +122,7 @@ A8.net  : https://media-console.a8.net/program/search/keyword?keywords={keyword}
 
 ### Step 5: Notion への保存
 
-保存先は Notion ワークスペース内の **`Claude Contents` > `news_link`** とする。
+保存先は Notion ワークスペース内の **`Claude Contents` > `news_link` > `{実行日 YYYY/MM/DD}`** とする。
 
 #### 5-1: 保存先ページの確認・作成
 
@@ -138,25 +138,66 @@ A8.net  : https://media-console.a8.net/program/search/keyword?keywords={keyword}
 
 3. 取得した `news_link_parent_id` を `config.json` の `notion_db_id` に自動書き込みして次回以降はスキップできるようにする
 
-#### 5-2: 記事ページの作成
+4. `news_link` の子ページから実行日（`YYYY/MM/DD`。Notionのページタイトルにスラッシュを使えない場合は `YYYY-MM-DD`）を検索する
+   - 見つかった場合 → そのページIDを `date_page_id` として記録
+   - 見つからない場合 → `notion-create-pages` で `news_link` 配下に日付ページを作成し、IDを記録
 
-`notion-create-pages` で `news_link` ページ配下に記事ページを作成する。
+#### 5-2: 「記事一覧」データベースの確認・作成
+
+日付ページ配下から `記事一覧` データベースを検索する。
+
+- 見つかった場合 → その data_source_id を `articles_ds_id` として記録
+- 見つからない場合 → `notion-create-database` で日付ページ配下に `記事一覧` データベースを作成し、以下のプロパティを設定して `articles_ds_id` を記録する：
+  - `タイトル` (title)
+  - `カテゴリ` (select) : Step2のカテゴリ一覧を選択肢として登録
+  - `取得日` (date)
+  - `出典URL` (url)
+  - `サイト` (select) : 巡回元サイト名
+  - `評価` (select) : 選択肢に `未読` / `既読` / `保留` を登録し、デフォルト `未読`
+
+#### 5-3: 記事レコードの作成
+
+`notion-create-pages` で `articles_ds_id` を parent（`data_source_id`）として記事ごとに1レコードを作成する。
 
 ```text
-保存先    : Claude Contents / news_link / {記事タイトル}
-タイトル  : 記事タイトル（最大100文字）
+保存先    : Claude Contents / news_link / {実行日} / 記事一覧 / {記事タイトル}
 プロパティ:
+  - タイトル (title)   : 記事タイトル（最大100文字）
   - カテゴリ (select)  : Step3で判定したカテゴリ
   - 取得日 (date)      : 実行日（YYYY-MM-DD）
   - 出典URL (url)      : 元記事URL
+  - サイト (select)    : 巡回元サイト名
   - 評価 (select)      : "未読" （デフォルト）
 本文      :
   ## 要約
   [Step3の要約本文]
 
-  ## アフィリエイトキーワード
-  [キーワード一覧とリンク表]
+  ## 楽天アフィリエイト
+  | キーワード | リンク |
+  | --- | --- |
+  | {kw1} | [検索]({rakuten_url1}) |
+  | ... | ... |
+
+  ## Amazon
+  | キーワード | リンク |
+  | --- | --- |
+  | {kw1} | [検索]({amazon_url1}) |
+  | ... | ... |
+
+  ## A8.net
+  | キーワード | リンク |
+  | --- | --- |
+  | {kw1} | [検索]({a8_url1}) |
+  | ... | ... |
+
+  ## もしも
+  | キーワード | リンク |
+  | --- | --- |
+  | {kw1} | [検索]({moshimo_url1}) |
+  | ... | ... |
 ```
+
+プラットフォームごとに表を分けること（1つの表に4列で並べない）。キーワード数は記事ごとに異なってよく、各表の行数はその記事で抽出したキーワード数に一致させる。
 
 ### Step 6: report フォルダへの保存
 
@@ -173,7 +214,8 @@ Markdown ファイルを作成する。
 - **カテゴリ**: {カテゴリ}
 - **取得日時**: {YYYY-MM-DD HH:mm}
 - **出典**: {URL}
-- **Notion**: {NotionページURL（取得できた場合）}
+- **サイト**: {巡回元サイト名}
+- **Notion**: {Claude Contents/news_link/{実行日}/記事一覧の該当ページURL（取得できた場合）}
 
 ---
 
@@ -183,12 +225,33 @@ Markdown ファイルを作成する。
 
 ---
 
-## 関連キーワード & アフィリエイトリンク
+## 楽天アフィリエイト
 
-| キーワード | 楽天 | Amazon | A8.net | もしも |
-| --- | --- | --- | --- | --- |
-| {kw1} | [検索]({rakuten_url1}) | [検索]({amazon_url1}) | [検索]({a8_url1}) | [検索]({moshimo_url1}) |
-| {kw2} | [検索]({rakuten_url2}) | [検索]({amazon_url2}) | [検索]({a8_url2}) | [検索]({moshimo_url2}) |
+| キーワード | リンク |
+| --- | --- |
+| {kw1} | [検索]({rakuten_url1}) |
+| {kw2} | [検索]({rakuten_url2}) |
+
+## Amazon
+
+| キーワード | リンク |
+| --- | --- |
+| {kw1} | [検索]({amazon_url1}) |
+| {kw2} | [検索]({amazon_url2}) |
+
+## A8.net
+
+| キーワード | リンク |
+| --- | --- |
+| {kw1} | [検索]({a8_url1}) |
+| {kw2} | [検索]({a8_url2}) |
+
+## もしも
+
+| キーワード | リンク |
+| --- | --- |
+| {kw1} | [検索]({moshimo_url1}) |
+| {kw2} | [検索]({moshimo_url2}) |
 
 ---
 
@@ -250,5 +313,7 @@ cp config.example.json config.json
 | ビジネス関連でない記事 | 除外・理由を記録 |
 | `Claude Contents` が存在しない | 自動作成してから保存 |
 | `news_link` ページが存在しない | 自動作成してから保存 |
-| Notion MCP が未接続 | Notion保存スキップ・report保存は実行 |
+| 実行日の日付ページが存在しない | 自動作成してから保存 |
+| `記事一覧` データベースが存在しない | 自動作成（プロパティ定義込み）してから保存 |
+| Notion MCP が未接続・作成に失敗 | Notion保存スキップ・report保存は実行 |
 | report/ フォルダ不在 | 自動作成して保存 |
