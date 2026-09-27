@@ -1,6 +1,5 @@
 {
-  "_comment": "このファイルをコピーして config.json を作成し、各値を設定してください。config.json はクラウド実行用にコミットします（秘密情報は書かないこと）。",
-  "notion_db_id": "xxxx-xxxx-xxxx-xxxx",
+  "_comment": "このファイルをコピーして config.json を作成し、各値を設定してください。config.json はクラウド実行用にコミットします（秘密情報は書かないこと）。notion_db_id は Claude Code 側の環境変数 NOTION_DB_ID で設定し、ここには書かないでください（.claude/settings.local.json、GitIgnore対象）。",
   "affiliate_platforms": [
     "rakuten",
     "amazon",

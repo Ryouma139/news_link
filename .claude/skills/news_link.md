@@ -146,17 +146,18 @@ A8.net  : https://px.a8.net/svt/ejp?a8mat={a8mat}
 
 以下の順で保存先を確認し、存在しない場合は作成する：
 
-1. `notion-search` で `Claude Contents` ページを検索する
+0. 環境変数 `NOTION_DB_ID` が設定されている場合は、その値をそのまま `news_link_parent_id` として使用し、手順1・2をスキップする。
+   `NOTION_DB_ID` は Claude Code 側（`.claude/settings.local.json` の `env`）で設定するものとし、**`config.json` には書き込まない**（`config.json` は GitHub にコミットされるため、Notion のページIDのような値をここに書き戻してはいけない）。
+
+1. （`NOTION_DB_ID` 未設定の場合）`notion-search` で `Claude Contents` ページを検索する
    - 見つかった場合 → そのページIDを `parent_id` として記録
    - 見つからない場合 → `notion-create-pages` でワークスペースルートに `Claude Contents` ページを作成し、そのIDを記録
 
-2. `Claude Contents` の子ページから `news_link` を検索する
+2. （`NOTION_DB_ID` 未設定の場合）`Claude Contents` の子ページから `news_link` を検索する
    - 見つかった場合 → そのページIDを `news_link_parent_id` として記録
    - 見つからない場合 → `notion-create-pages` で `Claude Contents` 配下に `news_link` ページを作成し、IDを記録
 
-3. 取得した `news_link_parent_id` を `config.json` の `notion_db_id` に自動書き込みして次回以降はスキップできるようにする
-
-4. `news_link` の子ページから実行日（`YYYY/MM/DD`。Notionのページタイトルにスラッシュを使えない場合は `YYYY-MM-DD`）を検索する
+3. `news_link` の子ページから実行日（`YYYY/MM/DD`。Notionのページタイトルにスラッシュを使えない場合は `YYYY-MM-DD`）を検索する
    - 見つかった場合 → そのページIDを `date_page_id` として記録
    - 見つからない場合 → `notion-create-pages` で `news_link` 配下に日付ページを作成し、IDを記録
 
@@ -368,22 +369,32 @@ SNS投稿管理への追記:
 
 ---
 
-## 設定（config.json）
+## 設定（config.json / 環境変数）
 
 `config.example.json` をコピーして `config.json` を作成し、各値を設定する。
 `config.json` はクラウド実行（GitHub から取得して動く）でも読めるよう**コミットする**。
-中身はアフィリエイトリンクに露出する公開値と Notion のページIDのみとし、**パスワード・APIキーなどの秘密情報は書かない**（それらは `.env` に置く。`.env` は `.gitignore` で除外）。
-`notion_db_id` を自動書き込みした場合は、その変更もコミットする。
+中身はアフィリエイトリンクに露出する公開値のみとし、**Notion のページIDやパスワード・APIキーなどの秘密情報は書かない**。
 
 ```bash
 cp config.example.json config.json
 ```
 
-読み込み優先順：`config.json` → 環境変数 → デフォルト値
+読み込み優先順：環境変数 → `config.json` → デフォルト値
+
+`notion_db_id` のみ例外で、**`config.json` には書かず環境変数 `NOTION_DB_ID` からのみ読み込む**。
+Claude Code 側の `.claude/settings.local.json`（`.gitignore` 対象、GitHubにはコミットされない）に以下の形式で設定する：
+
+```json
+{
+  "env": {
+    "NOTION_DB_ID": "xxxx-xxxx-xxxx-xxxx"
+  }
+}
+```
 
 | キー | 説明 | 必須 |
 | --- | --- | --- |
-| `notion_db_id` | Notion データベースID | Notion保存時のみ |
+| `NOTION_DB_ID`（環境変数。`config.json` には書かない） | Notion `news_link` ページID | Notion保存時のみ |
 | `affiliate_ids.amazon_tag` | Amazon アフィリエイトタグ | 任意 |
 | `affiliate_ids.rakuten_affiliate_id` | 楽天アフィリエイトID | 任意 |
 | `a8net_programs` | A8.net 提携済みプログラム一覧（`name` / `a8mat` / `keywords`）。a8mat は広告リンクの `px.a8.net/svt/ejp?a8mat=` 以降の値 | A8リンク生成時 |

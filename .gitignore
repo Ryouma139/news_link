@@ -3,6 +3,9 @@
 .env
 .env.local
 
+# Claude Code のローカル設定（notion_db_id を環境変数 NOTION_DB_ID として保持。GitHubには公開しない）
+.claude/settings.local.json
+
 # レポート出力（生成物は除外・フォルダ構造だけ残す）
 report/*
 !report/.gitkeep
