@@ -1,5 +1,5 @@
-# 個人設定・認証情報（GitHubに公開しない）
-config.json
+# 認証情報（GitHubに公開しない）
+# ※ config.json はクラウド実行で読み込むためコミットする（中身はリンクに露出する公開値のみ）
 .env
 .env.local
 

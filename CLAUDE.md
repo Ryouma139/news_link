@@ -18,7 +18,7 @@ cp config.example.json config.json
 
 | ファイル | 用途 | Git管理 |
 | --- | --- | --- |
-| `config.json` | 個人設定・アフィリエイトID | 除外（.gitignore） |
+| `config.json` | 個人設定・アフィリエイトID（クラウド実行で読むためコミットする） | 含む |
 | `config.example.json` | 設定テンプレート | 含む |
 | `report/` | 生成されたレポート | 除外（.gitignore） |
 

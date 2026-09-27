@@ -1,0 +1,55 @@
+{
+  "notion_db_id": "3aa2e8c9-228c-8179-bf52-e9b3d7e7a7e6",
+  "affiliate_platforms": [
+    "rakuten",
+    "amazon",
+    "a8net",
+    "moshimo"
+  ],
+  "affiliate_ids": {
+    "amazon_tag": "",
+    "rakuten_affiliate_id": ""
+  },
+  "a8net_programs": [
+    {
+      "name": "（未登録）筋トレ・プロテイン系",
+      "a8mat": "",
+      "keywords": [
+        "筋肉",
+        "筋トレ",
+        "プロテイン",
+        "ダイエット"
+      ]
+    },
+    {
+      "name": "（未登録）マッチングアプリ・婚活系",
+      "a8mat": "",
+      "keywords": [
+        "マッチング",
+        "マッチングアプリ",
+        "婚活",
+        "恋愛"
+      ]
+    },
+    {
+      "name": "（未登録）転職エージェント系",
+      "a8mat": "",
+      "keywords": [
+        "転職",
+        "エンジニア転職",
+        "キャリア"
+      ]
+    }
+  ],
+  "report_dir": "report",
+  "summary_max_chars": 400,
+  "max_articles_per_site": 5,
+  "categories": [
+    "経済",
+    "テクノロジー",
+    "政策",
+    "国際",
+    "社会",
+    "企業"
+  ]
+}

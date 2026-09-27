@@ -115,11 +115,28 @@ description: 指定ニュースURLからビジネス・社会情勢記事を取�
 ```text
 楽天    : https://affiliate.rakuten.co.jp/search?sitem={keyword}&l-id=af_header_cta_search
 Amazon  : https://www.amazon.co.jp/s?k={keyword}&crid=3LMLYI7X0CA62&sprefix={keyword}%2Caps%2C273&ref=nb_sb_ss_saint-jp-refocus-candidate_9_1
-A8.net  : https://media-console.a8.net/program/search/keyword?keywords={keyword}&pageNo=1&pageSize=20&sortKey=NORMAL
 もしも  : https://af.moshimo.com/af/shop/promotion/search?form_name=promotion_search_form&shop_site_id=&words={keyword}&promotion_level1_category_code%5B%5D=07&apply_status=&limit=10
 ```
 
 キーワードはURLエンコードして埋め込む（スペース→`+`、日本語は `%XX` 形式）。
+
+#### A8.net のリンク生成（ログイン不要のクリックURL）
+
+`media-console.a8.net/...` は**アフィリエイター本人用の管理画面**で、ログインが必要なため読者が開けない。
+**A8 の管理画面URLはリンクとして出力しない**。代わりに以下のクリック計測URLを生成する。
+
+A8.net はプログラムごとに発行される `a8mat` が必要で、キーワードから汎用リンクは作れない。
+`config.json` の `a8net_programs` に登録された**提携済みプログラム**から、記事キーワード・カテゴリに合うものを選んでリンクにする：
+
+```text
+A8.net  : https://px.a8.net/svt/ejp?a8mat={a8mat}
+```
+
+- マッチ判定は `a8net_programs[].keywords` と記事キーワード・カテゴリ・Step6 の投稿テーマとの関連で行う
+- 該当プログラムが1件もない場合は表を作らず、`該当する提携済みA8案件なし` と1行だけ書く
+  （必要ならその下に `案件探し（要ログイン・自分用）: https://media-console.a8.net/program/search/keyword?keywords={keyword}` を**リンクにせずテキストで**添える）
+- A8 の表は「キーワード」列ではなく「プログラム名」列で作る
+- `a8mat` が空のプログラムにマッチした場合は、リンク欄に `a8mat未設定（config.json に登録）` と書き、URLは出力しない
 
 ### Step 5: Notion への保存
 
@@ -186,10 +203,10 @@ A8.net  : https://media-console.a8.net/program/search/keyword?keywords={keyword}
   | ... | ... |
 
   ## A8.net
-  | キーワード | リンク |
+  | プログラム名 | リンク |
   | --- | --- |
-  | {kw1} | [検索]({a8_url1}) |
-  | ... | ... |
+  | {program_name1} | [詳細を見る](https://px.a8.net/svt/ejp?a8mat={a8mat1}) |
+  （該当なしの場合は「該当する提携済みA8案件なし」の1行のみ）
 
   ## もしも
   | キーワード | リンク |
@@ -273,9 +290,9 @@ Step 2〜4 で処理した各記事について、上表の「関連判定キー
 | {kw1} | [検索]({amazon_url1}) |
 
 **A8.net**
-| キーワード | リンク |
+| プログラム名 | リンク |
 | --- | --- |
-| {kw1} | [検索]({a8_url1}) |
+| {program_name1} | [詳細を見る](https://px.a8.net/svt/ejp?a8mat={a8mat1}) |
 
 **もしも**
 | キーワード | リンク |
@@ -332,10 +349,9 @@ Markdown ファイルを作成する。
 
 ## A8.net
 
-| キーワード | リンク |
+| プログラム名 | リンク |
 | --- | --- |
-| {kw1} | [検索]({a8_url1}) |
-| {kw2} | [検索]({a8_url2}) |
+| {program_name1} | [詳細を見る](https://px.a8.net/svt/ejp?a8mat={a8mat1}) |
 
 ## もしも
 
@@ -380,7 +396,9 @@ SNS投稿管理への追記:
 ## 設定（config.json）
 
 `config.example.json` をコピーして `config.json` を作成し、各値を設定する。
-`config.json` は `.gitignore` で除外されるため GitHub に公開されない。
+`config.json` はクラウド実行（GitHub から取得して動く）でも読めるよう**コミットする**。
+中身はアフィリエイトリンクに露出する公開値と Notion のページIDのみとし、**パスワード・APIキーなどの秘密情報は書かない**（それらは `.env` に置く。`.env` は `.gitignore` で除外）。
+`notion_db_id` を自動書き込みした場合は、その変更もコミットする。
 
 ```bash
 cp config.example.json config.json
@@ -393,8 +411,7 @@ cp config.example.json config.json
 | `notion_db_id` | Notion データベースID | Notion保存時のみ |
 | `affiliate_ids.amazon_tag` | Amazon アフィリエイトタグ | 任意 |
 | `affiliate_ids.rakuten_affiliate_id` | 楽天アフィリエイトID | 任意 |
-| `affiliate_ids.a8net_media_id` | A8.net メディアID | 任意 |
-| `affiliate_ids.moshimo_shop_site_id` | もしもアフィリエイト ショップサイトID | 任意 |
+| `a8net_programs` | A8.net 提携済みプログラム一覧（`name` / `a8mat` / `keywords`）。a8mat は広告リンクの `px.a8.net/svt/ejp?a8mat=` 以降の値 | A8リンク生成時 |
 | `report_dir` | レポート保存先フォルダ | 任意（デフォルト: `report`） |
 | `summary_max_chars` | 要約の最大文字数 | 任意（デフォルト: 400） |
 | `max_articles_per_site` | 1サイトあたりの最大取得記事数 | 任意（デフォルト: 5） |
@@ -412,6 +429,7 @@ cp config.example.json config.json
 | 実行日の日付ページが存在しない | 自動作成してから保存 |
 | `記事一覧` データベースが存在しない | 自動作成（プロパティ定義込み）してから保存 |
 | Notion MCP が未接続・作成に失敗 | Notion保存スキップ・report保存は実行 |
+| A8 の a8mat が未設定・該当なし | 「該当する提携済みA8案件なし」と記載。A8管理画面（要ログイン）のURLはリンクにしない |
 | SNS投稿テーマページが見つからない | そのテーマへの追記をスキップし、ターミナル出力に記録 |
 | SNS投稿テーマページに同じ出典URLが既にある | 重複追記しない |
 | report/ フォルダ不在 | 自動作成して保存 |

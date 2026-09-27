@@ -1,15 +1,36 @@
 {
-  "_comment": "このファイルをコピーして config.json を作成し、各値を設定してください。config.json は .gitignore で除外されます。",
+  "_comment": "このファイルをコピーして config.json を作成し、各値を設定してください。config.json はクラウド実行用にコミットします（秘密情報は書かないこと）。",
   "notion_db_id": "xxxx-xxxx-xxxx-xxxx",
-  "affiliate_platforms": ["rakuten", "amazon", "a8net", "moshimo"],
+  "affiliate_platforms": [
+    "rakuten",
+    "amazon",
+    "a8net",
+    "moshimo"
+  ],
   "affiliate_ids": {
     "amazon_tag": "your-affiliate-tag-22",
-    "rakuten_affiliate_id": "your-rakuten-id",
-    "a8net_media_id": "your-a8net-id",
-    "moshimo_shop_site_id": "your-moshimo-id"
+    "rakuten_affiliate_id": "your-rakuten-id"
   },
+  "a8net_programs": [
+    {
+      "name": "例：転職エージェント○○",
+      "a8mat": "XXXXXX+XXXXXX+XXXX+XXXXXX",
+      "keywords": [
+        "転職",
+        "エンジニア転職",
+        "キャリア"
+      ]
+    }
+  ],
   "report_dir": "report",
   "summary_max_chars": 400,
   "max_articles_per_site": 5,
-  "categories": ["経済", "テクノロジー", "政策", "国際", "社会", "企業"]
+  "categories": [
+    "経済",
+    "テクノロジー",
+    "政策",
+    "国際",
+    "社会",
+    "企業"
+  ]
 }
